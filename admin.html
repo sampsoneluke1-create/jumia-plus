@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Jumia+ Admin</title><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-gray-100 text-gray-800">
+<header class="bg-white shadow-sm"><div class="max-w-6xl mx-auto p-4 flex justify-between items-center"><h1 class="font-black text-xl">JUMIA+ NG <span class="text-orange-500">ADMIN</span></h1><a href="/" class="text-sm text-orange-600 underline">View storefront</a></div></header>
+<main class="max-w-6xl mx-auto p-4 sm:p-6">
+ <div class="flex flex-wrap items-center justify-between gap-3"><div><h2 class="text-2xl font-bold">Store management</h2><p class="text-sm text-gray-500">Manage catalogue products and review customer orders.</p></div><button id="refresh" class="bg-orange-500 text-white rounded px-4 py-2 font-semibold">Refresh</button></div>
+ <div class="flex gap-2 border-b my-5"><button class="tab px-4 py-3 border-b-2 border-orange-500 font-bold" data-tab="products">Products</button><button class="tab px-4 py-3" data-tab="orders">Orders</button></div>
+ <p id="notice" class="my-3 text-sm text-gray-600">Admin sign-in will be requested by your browser.</p>
+ <section id="productsTab">
+  <div class="bg-white rounded shadow-sm p-4 mb-5">
+   <h3 id="formTitle" class="font-bold text-lg mb-3">Add a product</h3>
+   <form id="productForm" class="grid sm:grid-cols-2 gap-3">
+    <input id="productName" required maxlength="160" placeholder="Product name" class="border rounded p-3">
+    <input id="productCategory" required maxlength="80" placeholder="Category (e.g. Electronics)" class="border rounded p-3">
+    <input id="productPrice" required type="number" min="1" step="1" placeholder="Selling price (NGN)" class="border rounded p-3">
+    <input id="productOldPrice" required type="number" min="1" step="1" placeholder="Previous price (NGN)" class="border rounded p-3">
+    <input id="productImage" required type="url" placeholder="HTTPS product image URL" class="border rounded p-3 sm:col-span-2">
+    <div class="flex gap-2 sm:col-span-2"><button id="saveProduct" class="bg-orange-500 text-white rounded px-5 py-3 font-bold">Save product</button><button type="button" id="cancelEdit" class="hidden border rounded px-5 py-3">Cancel edit</button></div>
+   </form><p class="text-xs text-gray-500 mt-3">Use a public HTTPS image URL. Prices are in Nigerian naira.</p>
+  </div><div id="productList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+ </section>
+ <section id="ordersTab" class="hidden"><div id="orders" class="space-y-3"></div></section>
+</main>
+<script>
+const money=n=>"₦"+Number(n).toLocaleString("en-NG");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let adminPassword=null,products=[],editingId=null;
+async function api(url,options={}) {
+ if(adminPassword===null){adminPassword=window.prompt("Enter the Jumia+ admin password:");if(adminPassword===null)throw new Error("Sign-in cancelled.");}
+ const response=await fetch(url,{...options,headers:{"Content-Type":"application/json","Authorization":"Basic "+btoa("admin:"+adminPassword),...(options.headers||{})}});
+ if(response.status===401){adminPassword=null;throw new Error("Incorrect admin password. Try again.");}
+ const data=await response.json();if(!response.ok)throw new Error(data.message||"Request failed.");return data;
+}
+function note(message){document.getElementById("notice").textContent=message;}
+async function loadProducts(){try{products=await api("/api/admin/products");renderProducts();note(`${products.length} product(s) in catalogue.`);}catch(e){note(e.message);}}
+function renderProducts(){
+ const box=document.getElementById("productList");
+ if(!products.length){box.innerHTML='<div class="bg-white rounded p-8 text-center text-gray-500 sm:col-span-2 lg:col-span-3">No products found. Add your first product above.</div>';return;}
+ box.innerHTML=products.map(p=>`<article class="bg-white rounded shadow-sm p-3 flex gap-3"><img src="${esc(p.image)}" alt="" class="w-24 h-24 object-contain bg-gray-50 rounded"><div class="min-w-0 flex-1"><h3 class="font-bold">${esc(p.name)}</h3><p class="text-xs text-gray-500">${esc(p.category)} · ID ${p.id}</p><p class="font-bold mt-1">${money(p.price)}</p><p class="text-xs text-gray-400 line-through">${money(p.oldPrice)}</p><div class="flex gap-2 mt-2"><button onclick="editProduct(${p.id})" class="text-sm text-blue-600 underline">Edit</button><button onclick="deleteProduct(${p.id})" class="text-sm text-red-600 underline">Delete</button></div></div></article>`).join("");
+}
+function resetForm(){editingId=null;document.getElementById("productForm").reset();document.getElementById("formTitle").textContent="Add a product";document.getElementById("saveProduct").textContent="Save product";document.getElementById("cancelEdit").classList.add("hidden");}
+function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;editingId=id;productName.value=p.name;productCategory.value=p.category;productPrice.value=p.price;productOldPrice.value=p.oldPrice;productImage.value=p.image;formTitle.textContent="Edit product";saveProduct.textContent="Update product";cancelEdit.classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});}
+async function deleteProduct(id){const p=products.find(x=>x.id===id);if(!p||!confirm(`Delete "${p.name}" from the catalogue?`))return;try{await api(`/api/admin/products/${id}`,{method:"DELETE"});await loadProducts();note("Product deleted.");}catch(e){note(e.message);}}
+productForm.addEventListener("submit",async e=>{e.preventDefault();const payload={name:productName.value.trim(),category:productCategory.value.trim(),price:Number(productPrice.value),oldPrice:Number(productOldPrice.value),image:productImage.value.trim()};try{await api(editingId?`/api/admin/products/${editingId}`:"/api/admin/products",{method:editingId?"PUT":"POST",body:JSON.stringify(payload)});resetForm();await loadProducts();note("Product saved successfully.");}catch(err){note(err.message);}});
+cancelEdit.addEventListener("click",resetForm);
+async function loadOrders(){try{const data=await api("/api/admin/orders"),box=document.getElementById("orders");note(`${data.length} order(s) found.`);if(!data.length){box.innerHTML='<div class="bg-white rounded p-8 text-center text-gray-500">No orders yet.</div>';return;}box.innerHTML=data.map(o=>`<article class="bg-white rounded shadow-sm p-4"><div class="flex flex-wrap justify-between gap-2"><div><h3 class="font-bold">${esc(o.customerName)}</h3><p class="text-xs text-gray-500">${esc(o.reference)} · ${new Date(o.createdAt).toLocaleString()}</p></div><span class="text-xs font-bold rounded px-2 py-1 bg-orange-100 text-orange-800">${esc(o.status.replaceAll("_"," "))}</span></div><div class="grid sm:grid-cols-2 gap-2 text-sm mt-3"><p><strong>Email:</strong> ${esc(o.email)}</p><p><strong>Phone:</strong> ${esc(o.phone)}</p><p class="sm:col-span-2"><strong>Address:</strong> ${esc(o.address)}</p></div><div class="border-t mt-3 pt-3 text-sm"><strong>Items</strong><ul class="list-disc ml-5 mt-1">${o.items.map(i=>`<li>${esc(i.name)} × ${i.qty} — ${money(i.price*i.qty)}</li>`).join("")}</ul><p class="font-bold mt-2">Total: ${money(o.total)}</p></div></article>`).join("");}catch(e){note(e.message);}}
+function setTab(name){productsTab.classList.toggle("hidden",name!=="products");ordersTab.classList.toggle("hidden",name!=="orders");document.querySelectorAll(".tab").forEach(b=>b.className="tab px-4 py-3 "+(b.dataset.tab===name?"border-b-2 border-orange-500 font-bold":""));if(name==="orders")loadOrders();else loadProducts();}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+refresh.addEventListener("click",()=>ordersTab.classList.contains("hidden")?loadProducts():loadOrders());loadProducts();
+</script></body></html>

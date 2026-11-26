@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f68b1e">
+  <title>Jumia+ | Online Shopping</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root { --orange:#f68b1e; --orange-dark:#df7710; --page:#f2f2f3; }
+    body { background:var(--page); font-family:Arial,Helvetica,sans-serif; }
+    .bg-brand{background:var(--orange)} .text-brand{color:var(--orange)}
+    .hover-brand:hover{background:var(--orange-dark)}
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .product-card{transition:transform .18s,box-shadow .18s}
+    .product-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px #00000012}
+
+    /* Mobile storefront inspired by the supplied reference screens */
+    body { padding-bottom: 82px; }
+    .mobile-search { background:#f1f1f2; border:0; border-radius:999px; padding:15px 18px; font-size:16px; }
+    .mobile-search:focus { outline:2px solid #f68b1e; background:#fff; }
+    .mobile-bottom-nav { position:fixed; z-index:45; bottom:0; left:0; right:0; display:grid; grid-template-columns:repeat(5,1fr); background:#fff; border-top:1px solid #d5d5d5; padding:8px 3px max(8px,env(safe-area-inset-bottom)); }
+    .mobile-bottom-nav button { display:flex; flex-direction:column; align-items:center; gap:4px; color:#454545; font-size:11px; font-weight:600; }
+    .mobile-bottom-nav button.active { color:#f68b1e; }
+    .mobile-bottom-nav i { font-size:23px; }
+    .mobile-view { display:none; }
+    .mobile-view.active { display:block; }
+    .home-banner { background:linear-gradient(115deg,#17131e,#2d1736 55%,#f68b1e); color:#fff; border-radius:18px; min-height:190px; }
+    .promo-tile { min-height:115px; border-radius:15px; background:linear-gradient(140deg,#3c3c3c,#151515); color:#fff; }
+    .flash-wrap { background:#b8173d; border-radius:18px; padding:12px; color:#fff; }
+    .flash-card { background:#fff; color:#444; border-radius:12px; overflow:hidden; min-width:160px; width:45%; flex:0 0 45%; }
+    .flash-card img { width:100%; aspect-ratio:1/1; object-fit:contain; background:#fff; }
+    .category-layout { display:grid; grid-template-columns:112px minmax(0,1fr); gap:10px; }
+    .category-rail { background:#fff; }
+    .category-rail button { display:block; width:100%; padding:18px 9px; min-height:76px; text-align:center; font-size:13px; border-left:4px solid transparent; }
+    .category-rail button.active { border-left-color:#f68b1e; background:#f4f4f4; font-weight:700; }
+    .category-content { min-width:0; }
+    .category-panel { background:#fff; border-radius:10px; margin-bottom:12px; padding:14px; }
+    .category-chip { background:#f4f4f4; border-radius:8px; padding:12px 6px; text-align:center; font-size:12px; }
+    .account-row { display:flex; align-items:center; justify-content:space-between; background:#fff; padding:17px 16px; border-bottom:1px solid #eee; color:#444; }
+    .account-row i:first-child { width:34px; font-size:20px; color:#333; }
+    .cart-line { background:#fff; border-radius:9px; padding:12px; display:flex; gap:12px; }
+    .cart-line img { width:105px; height:105px; object-fit:contain; }
+    @media (min-width:768px) {
+      body { padding-bottom:0; }
+      .mobile-bottom-nav { display:none; }
+      .mobile-view { display:block; }
+      .mobile-view:not(.active) { display:none; }
+      .category-layout { grid-template-columns:190px minmax(0,1fr); }
+      .flash-card { width:190px; flex-basis:190px; }
+    }
+
+  </style>
+</head>
+<body class="text-gray-800">
+  <header class="bg-white sticky top-0 z-40 border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-3">
+        <a href="#" class="flex items-center gap-2 shrink-0" onclick="switchView('home');return false;" aria-label="Jumia+ home">
+          <img src="/jumia-plus-profile.jpg" alt="Jumia+ profile logo" class="h-10 w-auto max-w-[118px] object-contain rounded-sm">
+          <span class="text-xs font-black text-gray-700">JP</span>
+        </a>
+        <div class="flex flex-1 min-w-0">
+          <span class="mobile-search flex items-center gap-3 w-full"><i class="fa-solid fa-magnifying-glass text-gray-700"></i><input id="searchInput" class="bg-transparent outline-none w-full" placeholder="Search on Jumia+" aria-label="Search products"></span>
+          <button id="searchBtn" class="hidden bg-brand text-white px-4 rounded-r text-sm font-bold">SEARCH</button>
+        </div>
+        <button class="hidden sm:block hover:text-brand" onclick="switchView('account')"><i class="fa-regular fa-user mr-1"></i>Account</button>
+        <button onclick="switchView('cart')" class="hidden sm:block relative hover:text-brand"><i class="fa-solid fa-cart-shopping text-xl"></i><span id="cartCount" class="absolute -top-2 -right-3 bg-brand text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">0</span><span class="ml-2">Cart</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto md:px-4 py-0 md:py-5">
+    <section id="view-home" class="mobile-view active px-3 md:px-0 space-y-4">
+      <div class="text-center text-sm font-bold py-2 border-b">CALL TO ORDER: Contact our customer support</div>
+      <div class="home-banner p-5 md:p-10 flex items-center justify-between overflow-hidden">
+        <div class="max-w-[62%] relative z-10">
+          <div class="text-xs uppercase font-bold tracking-wider text-orange-200">Jumia+ special offers</div>
+          <h1 class="text-3xl md:text-5xl font-black leading-tight mt-2">DEALS YOU'LL LOVE</h1>
+          <p class="text-sm mt-2 text-gray-200">Great prices on everyday essentials and more.</p>
+          <button onclick="document.getElementById('catalogue').scrollIntoView({behavior:'smooth'})" class="bg-white text-gray-900 rounded-full px-5 py-2 mt-4 font-bold text-sm">Discover →</button>
+        </div>
+        <div class="text-right"><div class="text-6xl md:text-8xl font-black text-orange-400">30%</div><div class="font-black text-2xl">OFF</div></div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <button onclick="filterCategory('Appliances');switchView('home')" class="promo-tile p-3 text-left"><i class="fa-solid fa-fan text-3xl text-orange-400"></i><div class="font-bold text-sm mt-2">Deals on appliances</div></button>
+        <button onclick="filterCategory('All');switchView('home')" class="promo-tile p-3 text-center"><div class="font-black text-lg">JUMIA+</div><div class="font-bold text-sm mt-2">Great value</div></button>
+        <button onclick="filterCategory('Fashion');switchView('home')" class="promo-tile p-3 text-left"><i class="fa-solid fa-shirt text-3xl text-orange-400"></i><div class="font-bold text-sm mt-2">Fashion finds</div></button>
+      </div>
+      <section class="flash-wrap">
+        <div class="flex justify-between items-center mb-3"><h2 class="font-black text-2xl">Flash Sales</h2><span class="bg-white text-brand rounded-full px-3 py-1 text-xs font-bold">Hot deals today</span></div>
+        <div id="flashProducts" class="flex gap-3 overflow-x-auto pb-1"></div>
+      </section>
+      <section id="catalogue" class="bg-white rounded-lg overflow-hidden">
+        <div class="px-4 py-4 flex justify-between items-center border-b"><h2 id="sectionTitle" class="font-bold text-lg">Featured Products</h2><button onclick="switchView('categories')" class="text-brand font-bold text-sm">SEE ALL</button></div>
+        <div id="productGrid" class="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+      </section>
+    </section>
+
+    <section id="view-categories" class="mobile-view">
+      <div class="category-layout">
+        <nav id="categoryRail" class="category-rail">
+          <button class="active" onclick="selectCategoryRail('Home & Office',this)">Home & Office</button>
+          <button onclick="selectCategoryRail('Phones & Tablets',this)">Phones & Tablets</button>
+          <button onclick="selectCategoryRail('Fashion',this)">Fashion</button>
+          <button onclick="selectCategoryRail('Health & Beauty',this)">Health & Beauty</button>
+          <button onclick="selectCategoryRail('Electronics',this)">Electronics</button>
+          <button onclick="selectCategoryRail('Computing',this)">Computing</button>
+          <button onclick="selectCategoryRail('Grocery',this)">Grocery</button>
+          <button onclick="selectCategoryRail('Garden & Outdoors',this)">Garden & Outdoors</button>
+          <button onclick="selectCategoryRail('Automobile',this)">Automobile</button>
+          <button onclick="selectCategoryRail('Sporting Goods',this)">Sporting Goods</button>
+          <button onclick="selectCategoryRail('Gaming',this)">Gaming</button>
+          <button onclick="selectCategoryRail('Appliances',this)">Appliances</button>
+        </nav>
+        <div class="category-content p-2">
+          <button onclick="filterCategory('All');switchView('home')" class="category-panel w-full text-left font-black flex justify-between">SEE ALL PRODUCTS <i class="fa-solid fa-chevron-right"></i></button>
+          <div class="category-panel">
+            <h3 class="font-black border-b pb-3 mb-3">APPLIANCES</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <button class="category-chip" onclick="filterCategory('Appliances');switchView('home')"><i class="fa-solid fa-blender text-4xl block mb-2 text-gray-500"></i>Appliances</button>
+              <button class="category-chip" onclick="filterCategory('Appliances');switchView('home')"><i class="fa-solid fa-kitchen-set text-4xl block mb-2 text-gray-500"></i>Small Appliances</button>
+            </div>
+          </div>
+          <div class="category-panel">
+            <h3 class="font-black border-b pb-3 mb-3">HOME & KITCHEN</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <button class="category-chip" onclick="filterCategory('Home & Office');switchView('home')"><i class="fa-solid fa-kitchen-set text-3xl block mb-2"></i>Cookware</button>
+              <button class="category-chip" onclick="filterCategory('Appliances');switchView('home')"><i class="fa-solid fa-blender text-3xl block mb-2"></i>Small appliances</button>
+              <button class="category-chip" onclick="filterCategory('Home & Office');switchView('home')"><i class="fa-solid fa-house text-3xl block mb-2"></i>Home</button>
+            </div>
+          </div>
+          <div class="category-panel">
+            <h3 class="font-black border-b pb-3 mb-3">SHOP BY CATEGORY</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <button class="category-chip" onclick="filterCategory('Phones & Tablets');switchView('home')">Phones & Tablets</button>
+              <button class="category-chip" onclick="filterCategory('Computing');switchView('home')">Computing</button>
+              <button class="category-chip" onclick="filterCategory('Fashion');switchView('home')">Fashion</button>
+              <button class="category-chip" onclick="filterCategory('Gaming');switchView('home')">Gaming</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-cart" class="mobile-view px-3 md:px-0">
+      <h1 class="text-3xl font-semibold py-5">Cart</h1>
+      <div class="bg-white border-y px-4 py-3 flex justify-between font-bold"><span>Subtotal</span><span id="cartPageSubtotal">₦0</span></div>
+      <div class="text-sm px-4 py-3 bg-gray-100" id="cartPageCount">CART (0)</div>
+      <div id="cartPageItems" class="space-y-2"></div>
+      <div class="bg-white p-4 mt-3 flex gap-3">
+        <button class="border border-brand text-brand rounded-lg px-5" onclick="showToast('Contact details can be added in store settings.')"><i class="fa-solid fa-phone"></i></button>
+        <button onclick="openCheckout()" class="bg-brand text-white rounded-lg py-4 flex-1 font-bold">Checkout (<span id="cartPageTotal">₦0</span>)</button>
+      </div>
+      <section class="mt-6 bg-white p-4 rounded"><h2 class="font-bold mb-3">Recently Viewed</h2><div id="recentlyViewed" class="grid grid-cols-2 gap-3"></div></section>
+    </section>
+
+    <section id="view-wishlist" class="mobile-view px-3 md:px-0">
+      <h1 class="text-3xl font-semibold py-5">Wishlist</h1>
+      <div id="wishlistContent" class="bg-white min-h-[65vh] p-4"></div>
+    </section>
+
+    <section id="view-account" class="mobile-view">
+      <div class="bg-white p-5 flex items-center justify-between gap-3">
+        <div><h1 class="font-bold text-xl">Welcome</h1><p class="text-sm text-gray-600">Enter your account</p></div>
+        <button onclick="showToast('Customer sign-in will be connected when account services are configured.')" class="bg-brand text-white rounded-lg px-5 py-4 font-bold">Login/Sign in</button>
+      </div>
+      <button onclick="showToast('Sign in to view your balance.')" class="bg-white text-blue-600 font-bold p-5 w-full text-left"><i class="fa-solid fa-wallet mr-3"></i>Login to see your balance</button>
+      <div class="grid grid-cols-2 gap-2 bg-gray-100 p-3">
+        <button onclick="showToast('Live chat support is not configured yet.')" class="bg-brand text-white rounded-lg py-4 font-bold"><i class="fa-solid fa-comment-dots mr-2"></i>Live Chat</button>
+        <button onclick="showToast('Add your WhatsApp support number in settings.')" class="bg-white border-2 border-green-500 text-green-600 rounded-lg py-4 font-bold"><i class="fa-brands fa-whatsapp mr-2"></i>WhatsApp</button>
+      </div>
+      <h2 class="font-bold text-lg px-4 py-4 bg-white mt-2">Need Assistance?</h2>
+      <button class="account-row w-full" onclick="showToast('Add your support details before publishing.')"><span><i class="fa-solid fa-circle-info mr-3"></i>Help & Support</span><i class="fa-solid fa-chevron-right"></i></button>
+      <h2 class="font-bold text-lg px-4 py-4 bg-white mt-2">My Jumia+ Account</h2>
+      <button class="account-row w-full" onclick="switchView('cart')"><span><i class="fa-solid fa-box mr-3"></i>Orders</span><i class="fa-solid fa-chevron-right"></i></button>
+      <button class="account-row w-full" onclick="showToast('Inbox will be available with customer accounts.')"><span><i class="fa-regular fa-envelope mr-3"></i>Inbox</span><i class="fa-solid fa-chevron-right"></i></button>
+      <button class="account-row w-full" onclick="showToast('Ratings and reviews will be enabled in a later update.')"><span><i class="fa-regular fa-pen-to-square mr-3"></i>Ratings & Reviews</span><i class="fa-solid fa-chevron-right"></i></button>
+      <button class="account-row w-full" onclick="showToast('Vouchers will appear here when configured.')"><span><i class="fa-solid fa-ticket mr-3"></i>Vouchers</span><i class="fa-solid fa-chevron-right"></i></button>
+      <button class="account-row w-full" onclick="switchView('wishlist')"><span><i class="fa-regular fa-heart mr-3"></i>Wishlist</span><i class="fa-solid fa-chevron-right"></i></button>
+      <button class="account-row w-full" onclick="showToast('Seller following will be added later.')"><span><i class="fa-solid fa-store mr-3"></i>Followed Sellers</span><i class="fa-solid fa-chevron-right"></i></button>
+      <button class="account-row w-full" onclick="switchView('home')"><span><i class="fa-regular fa-eye mr-3"></i>Recently Viewed</span><i class="fa-solid fa-chevron-right"></i></button>
+      <h2 class="font-bold text-lg px-4 py-4 bg-white mt-2">My Settings</h2>
+      <button class="account-row w-full" onclick="showToast('Address book will be available with customer accounts.')">Address Book <i class="fa-solid fa-chevron-right"></i></button>
+      <button class="account-row w-full" onclick="showToast('Notification preferences will be available with customer accounts.')">Notification Preferences <i class="fa-solid fa-chevron-right"></i></button>
+    </section>
+  </main>
+
+  <nav class="mobile-bottom-nav" aria-label="Main navigation">
+    <button data-view="home" class="active" onclick="switchView('home')"><i class="fa-solid fa-house"></i><span>Home</span></button>
+    <button data-view="categories" onclick="switchView('categories')"><i class="fa-solid fa-list-alt"></i><span>Categories</span></button>
+    <button data-view="cart" onclick="switchView('cart')" class="relative"><i class="fa-solid fa-cart-shopping"></i><span>Cart</span></button>
+    <button data-view="wishlist" onclick="switchView('wishlist')"><i class="fa-regular fa-heart"></i><span>Wishlist</span></button>
+    <button data-view="account" onclick="switchView('account')"><i class="fa-regular fa-user"></i><span>Account</span></button>
+  </nav>
+
+  <div id="cartOverlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="toggleCart()"></div>
+  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[51] translate-x-full transition-transform flex flex-col shadow-xl">
+    <div class="p-4 border-b flex justify-between items-center"><h2 class="font-bold text-lg">Your Cart (<span id="drawerCount">0</span>)</h2><button onclick="toggleCart()" class="text-2xl" aria-label="Close cart">&times;</button></div>
+    <div id="cartItems" class="p-4 flex-1 overflow-y-auto space-y-4"></div>
+    <div class="p-4 border-t bg-gray-50 space-y-3">
+      <div class="flex justify-between font-bold"><span>Subtotal</span><span id="cartSubtotal">₦0</span></div>
+      <p class="text-xs text-gray-500">Delivery fee is calculated at checkout.</p>
+      <button onclick="openCheckout()" class="bg-brand hover-brand text-white rounded w-full py-3 font-bold">PROCEED TO CHECKOUT</button>
+    </div>
+  </aside>
+
+
+  <div id="productModal" class="fixed inset-0 bg-black/60 z-[55] hidden items-center justify-center p-3" onclick="if(event.target===this)closeProductDetails()">
+    <div class="bg-white rounded-lg w-full max-w-2xl max-h-[92vh] overflow-y-auto relative">
+      <button onclick="closeProductDetails()" class="absolute right-3 top-2 text-3xl z-10" aria-label="Close product details">&times;</button>
+      <div id="productDetailsContent" class="p-5"></div>
+    </div>
+  </div>
+
+  <section class="max-w-7xl mx-auto px-4 pb-6">
+    <div class="bg-white rounded shadow-sm p-5">
+      <h2 class="font-bold text-lg mb-2">Track an order</h2>
+      <p class="text-xs text-gray-500 mb-3">Enter the order reference shown after payment to check its latest status.</p>
+      <form id="trackOrderForm" class="flex flex-col sm:flex-row gap-2">
+        <input id="orderReferenceInput" required maxlength="100" class="border rounded px-3 py-2 flex-1 text-sm" placeholder="Your order reference">
+        <button class="bg-gray-800 text-white rounded px-5 py-2 text-sm font-bold">TRACK ORDER</button>
+      </form>
+      <div id="orderTrackingResult" class="text-sm mt-3" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <div id="checkoutModal" class="fixed inset-0 bg-black/60 z-[60] hidden items-center justify-center p-3">
+    <div class="bg-white rounded-lg w-full max-w-lg max-h-[94vh] overflow-y-auto">
+      <div class="bg-brand text-white p-4 flex justify-between items-center"><h2 class="font-bold text-lg">Delivery & Payment</h2><button onclick="closeCheckout()" class="text-2xl" aria-label="Close checkout">&times;</button></div>
+      <form id="checkoutForm" class="p-5 space-y-3">
+        <label class="block text-sm font-semibold">Full name<input id="customerName" required maxlength="100" autocomplete="name" class="mt-1 w-full border rounded p-3 font-normal" placeholder="Your full name"></label>
+        <label class="block text-sm font-semibold">Email address<input id="customerEmail" type="email" required maxlength="254" autocomplete="email" class="mt-1 w-full border rounded p-3 font-normal" placeholder="you@example.com"></label>
+        <label class="block text-sm font-semibold">Phone number<input id="customerPhone" type="tel" required maxlength="30" autocomplete="tel" class="mt-1 w-full border rounded p-3 font-normal" placeholder="08012345678"></label>
+        <label class="block text-sm font-semibold">Delivery address<textarea id="customerAddress" required maxlength="500" autocomplete="street-address" rows="3" class="mt-1 w-full border rounded p-3 font-normal" placeholder="Street, area, city and state"></textarea></label>
+        <div class="bg-gray-50 rounded p-4 text-sm space-y-2">
+          <div class="flex justify-between"><span>Subtotal</span><strong id="checkoutSubtotal">₦0</strong></div>
+          <div class="flex justify-between"><span>Delivery</span><strong id="deliveryFee">₦2,500</strong></div>
+          <div class="border-t pt-2 flex justify-between text-base"><span>Total</span><strong id="checkoutTotal">₦0</strong></div>
+        </div>
+        <p id="checkoutMessage" class="text-sm text-red-600" role="alert"></p>
+        <button id="payButton" type="submit" class="bg-brand hover-brand text-white rounded w-full py-3 font-bold">CONTINUE TO SECURE PAYMENT</button>
+        <p class="text-[11px] text-gray-500 text-center">You will be redirected to Paystack to complete payment. This demo requires a merchant test key.</p>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-3 rounded shadow-lg hidden z-[80]" role="status"></div>
+
+  <footer class="bg-[#303033] text-gray-300 mt-12">
+    <div class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
+      <div><div class="font-black text-white text-xl">JUMIA+ NG</div><p class="mt-2 text-xs">An independent storefront starter project. Not affiliated with Jumia.</p></div>
+      <div><h3 class="font-bold text-white mb-2">Customer support</h3><p class="text-xs">Add your support email and phone number before publishing.</p></div>
+      <div><h3 class="font-bold text-white mb-2">Important</h3><p class="text-xs">Replace sample products, delivery charges and policies with your real store information.</p></div>
+    </div>
+  </footer>
+
+<script>
+let products = [
+ {id:1,name:"Samsung Galaxy A55 5G - 8GB/256GB",category:"Phones & Tablets",price:545000,oldPrice:620000,discount:"-12%",rating:4.8,reviews:142,image:"https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500&q=80"},
+ {id:2,name:"Apple MacBook Air M2 13.6-inch",category:"Computing",price:1450000,oldPrice:1680000,discount:"-14%",rating:4.9,reviews:89,image:"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80"},
+ {id:3,name:"Sony WH-1000XM5 Wireless Headphones",category:"Electronics",price:420000,oldPrice:510000,discount:"-18%",rating:4.7,reviews:215,image:"https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&q=80"},
+ {id:4,name:"Nike Air Max Pulse Men's Sneakers",category:"Fashion",price:115000,oldPrice:150000,discount:"-23%",rating:4.5,reviews:64,image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80"},
+ {id:5,name:"Binatone 1.5L Heavy Duty Blender",category:"Appliances",price:48500,oldPrice:65000,discount:"-25%",rating:4.4,reviews:310,image:"https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=500&q=80"},
+ {id:6,name:"PlayStation 5 Slim Console",category:"Gaming",price:795000,oldPrice:890000,discount:"-11%",rating:4.9,reviews:178,image:"https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=500&q=80"},
+ {id:7,name:"Hisense 55-Inch 4K Smart TV",category:"Electronics",price:465000,oldPrice:550000,discount:"-15%",rating:4.6,reviews:95,image:"https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&q=80"},
+ {id:8,name:"Ergonomic Mesh Office Chair",category:"Home & Office",price:135000,oldPrice:180000,discount:"-25%",rating:4.3,reviews:52,image:"https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?w=500&q=80"},
+ {id:9,name:"iPhone 15 Pro Max 256GB",category:"Phones & Tablets",price:1780000,oldPrice:1950000,discount:"-9%",rating:5.0,reviews:204,image:"https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80"},
+ {id:10,name:"HP Pavilion 15 Core i7 Laptop",category:"Computing",price:890000,oldPrice:1050000,discount:"-15%",rating:4.6,reviews:73,image:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&q=80"}
+];
+let cart = [];
+try {
+ const savedCart = JSON.parse(localStorage.getItem("shophub_cart") || "[]");
+ if (Array.isArray(savedCart)) {
+  cart = savedCart.filter(x => products.some(p => p.id === x.id) && Number.isInteger(x.qty) && x.qty > 0)
+    .map(x => ({...products.find(p => p.id === x.id), qty: Math.min(x.qty, 20)}));
+ }
+} catch { cart = []; }
+let currentCategory = "All";
+
+let wishlist = [];
+try { wishlist = JSON.parse(localStorage.getItem("shophub_wishlist") || "[]").filter(id => products.some(p=>p.id===id)); } catch { wishlist=[]; }
+let recentlyViewed = [];
+function isWishlisted(id){ return wishlist.includes(id); }
+function toggleWishlist(id){
+  wishlist = isWishlisted(id) ? wishlist.filter(x=>x!==id) : [...wishlist,id];
+  try { localStorage.setItem("shophub_wishlist",JSON.stringify(wishlist)); } catch {}
+  renderProducts(products.filter(p=>(currentCategory==="All"||p.category===currentCategory)));
+  renderWishlist();
+  showToast(isWishlisted(id)?"Saved to wishlist":"Removed from wishlist");
+}
+function renderWishlist(){
+ const el=document.getElementById("wishlistContent"); if(!el)return;
+ const items=products.filter(p=>wishlist.includes(p.id));
+ if(!items.length){el.innerHTML='<div class="text-center py-16"><div class="mx-auto rounded-full bg-gray-100 w-36 h-36 flex items-center justify-center text-6xl text-orange-400"><i class="fa-regular fa-heart"></i></div><h2 class="font-bold text-xl mt-8">Your wishlist is empty</h2><p class="text-gray-600 mt-3">Save products you love and find them here.</p><button onclick="switchView(\'home\')" class="bg-brand text-white rounded-lg px-8 py-3 mt-8 font-bold">Explore products</button></div>';return;}
+ el.innerHTML='<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">'+items.map(p=>`<article class="border rounded p-2"><img src="${p.image}" class="w-full aspect-square object-contain" alt="${p.name}"><p class="text-sm mt-2 line-clamp-2">${p.name}</p><b>${money(p.price)}</b><div class="flex gap-2 mt-2"><button onclick="addToCart(${p.id})" class="bg-brand text-white rounded px-2 py-2 text-xs flex-1">Add to cart</button><button onclick="toggleWishlist(${p.id})" class="border rounded px-3">♥</button></div></article>`).join('')+'</div>';
+}
+function switchView(name){
+ document.querySelectorAll('.mobile-view').forEach(el=>el.classList.toggle('active',el.id==='view-'+name));
+ document.querySelectorAll('.mobile-bottom-nav button').forEach(el=>el.classList.toggle('active',el.dataset.view===name));
+ if(name==='cart')renderCartPage();
+ if(name==='wishlist')renderWishlist();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function selectCategoryRail(category,button){
+ document.querySelectorAll('#categoryRail button').forEach(b=>b.classList.remove('active'));
+ button.classList.add('active');
+ filterCategory(category);
+}
+function renderCartPage(){
+ const subtotal=cart.reduce((s,x)=>s+x.price*x.qty,0);
+ document.getElementById('cartPageSubtotal').textContent=money(subtotal);
+ document.getElementById('cartPageTotal').textContent=money(subtotal+DELIVERY_FEE);
+ document.getElementById('cartPageCount').textContent=`CART (${cart.reduce((s,x)=>s+x.qty,0)})`;
+ const box=document.getElementById('cartPageItems');
+ if(!cart.length){box.innerHTML='<div class="bg-white text-center p-12 text-gray-500"><i class="fa-solid fa-cart-shopping text-4xl text-orange-300"></i><p class="font-bold mt-3">Your cart is empty</p><button onclick="switchView(\'home\')" class="text-brand font-bold mt-4">Start shopping</button></div>';return;}
+ box.innerHTML=cart.map(x=>`<div class="cart-line"><img src="${x.image}" alt="${x.name}"><div class="flex-1 min-w-0"><p class="font-semibold text-sm line-clamp-2">${x.name}</p><p class="font-black mt-2">${money(x.price)}</p><p class="text-xs text-gray-400 line-through">${money(x.oldPrice)}</p><p class="text-xs text-amber-600 mt-1">Few units left</p><div class="flex items-center gap-4 mt-3"><button onclick="changeQty(${x.id},-1)" class="bg-orange-100 rounded px-3 py-2">−</button><b>${x.qty}</b><button onclick="changeQty(${x.id},1)" class="bg-brand text-white rounded px-3 py-2">+</button><button onclick="changeQty(${x.id},-${x.qty})" class="text-brand ml-auto">Remove</button></div></div></div>`).join('');
+ document.getElementById('recentlyViewed').innerHTML=products.slice(0,2).map(p=>`<button onclick="openProductDetails(${p.id})" class="text-left"><img src="${p.image}" class="w-full aspect-square object-contain"><p class="text-sm">${p.name}</p><b>${money(p.price)}</b></button>`).join('');
+}
+
+const DELIVERY_FEE = 2500;
+const money = n => "₦" + Number(n).toLocaleString("en-NG");
+
+function renderProducts(items) {
+ const grid=document.getElementById("productGrid");
+ if(!items.length){grid.innerHTML='<div class="col-span-full text-center py-12 text-gray-500">No products found. Try another search.</div>';return;}
+ grid.innerHTML=items.map(p=>`
+ <article class="product-card border border-gray-100 rounded p-2.5 flex flex-col">
+  <div class="relative aspect-square bg-gray-50 rounded overflow-hidden">
+   <img src="${p.image}" alt="${p.name}" loading="lazy" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/500x500?text=Product'">
+   <span class="absolute top-2 right-2 bg-orange-100 text-brand text-xs font-bold px-2 py-1 rounded">${p.discount}</span><button onclick="toggleWishlist(${p.id})" class="absolute top-2 left-2 bg-white rounded-full w-8 h-8 shadow text-lg" aria-label="Toggle wishlist">${isWishlisted(p.id)?"♥":"♡"}</button>
+  </div>
+  <h3 class="text-sm mt-2 line-clamp-2 min-h-10">${p.name}</h3>
+  <p class="font-bold mt-1">${money(p.price)}</p>
+  <p class="text-xs text-gray-400 line-through">${money(p.oldPrice)}</p>
+  <p class="text-xs text-yellow-500 mt-1">★ <span class="text-gray-600">${p.rating}</span> <span class="text-gray-400">(${p.reviews})</span></p>
+  <button onclick="openProductDetails(${p.id})" class="border border-gray-300 hover:border-orange-400 rounded py-2 mt-3 text-xs font-semibold">VIEW DETAILS</button>
+  <button onclick="addToCart(${p.id})" class="bg-brand hover-brand text-white rounded py-2 mt-2 text-xs font-bold"><i class="fa-solid fa-cart-plus mr-1"></i> ADD TO CART</button>
+ </article>`).join("");
+}
+
+function openProductDetails(id){
+ const p=products.find(x=>x.id===id); if(!p)return;
+ recentlyViewed=[id,...recentlyViewed.filter(x=>x!==id)].slice(0,8);
+ const content=document.getElementById("productDetailsContent");
+ content.innerHTML=`
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-5">
+   <div class="bg-gray-50 rounded overflow-hidden"><img src="${p.image}" alt="${p.name}" class="w-full aspect-square object-cover" onerror="this.src='https://placehold.co/500x500?text=Product'"></div>
+   <div class="flex flex-col justify-center">
+    <p class="text-xs uppercase tracking-wide text-brand font-bold">${p.category}</p>
+    <h2 class="text-xl font-bold mt-2">${p.name}</h2>
+    <p class="text-yellow-500 mt-2">★ <span class="text-gray-700">${p.rating}</span> <span class="text-gray-400 text-sm">(${p.reviews} reviews – sample data)</span></p>
+    <p class="text-2xl font-black mt-4">${money(p.price)}</p>
+    <p class="line-through text-gray-400 text-sm">${money(p.oldPrice)}</p>
+    <p class="text-sm text-gray-600 mt-4">A sample catalogue listing. Confirm product specifications, availability, warranty and seller details before publishing this item for sale.</p>
+    <button onclick="addToCart(${p.id});closeProductDetails()" class="bg-brand hover-brand text-white rounded py-3 px-4 mt-5 font-bold">ADD TO CART</button>
+   </div>
+  </div>`;
+ const modal=document.getElementById("productModal");modal.classList.remove("hidden");modal.classList.add("flex");
+}
+function closeProductDetails(){
+ const modal=document.getElementById("productModal");modal.classList.add("hidden");modal.classList.remove("flex");
+}
+
+function filterCategory(category){
+ currentCategory=category;
+ document.getElementById("sectionTitle").innerHTML='<i class="fa-solid fa-bolt text-yellow-300 mr-2"></i>'+ (category==="All"?"Featured Products":category);
+ const q=document.getElementById("searchInput").value.trim().toLowerCase();
+ renderProducts(products.filter(p=>(category==="All"||p.category===category)&&(!q||p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q))));
+}
+function showAll(){document.getElementById("searchInput").value="";filterCategory("All");}
+function searchProducts(){
+ const q=document.getElementById("searchInput").value.trim().toLowerCase();
+ document.getElementById("sectionTitle").textContent=q?`Search results for "${q}"`:"Featured Products";
+ renderProducts(products.filter(p=>(currentCategory==="All"||p.category===currentCategory)&&(!q||p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q))));
+}
+document.getElementById("searchBtn").addEventListener("click",searchProducts);
+document.getElementById("searchInput").addEventListener("input",searchProducts);
+
+function addToCart(id){
+ const p=products.find(x=>x.id===id); const existing=cart.find(x=>x.id===id);
+ if(existing) existing.qty++; else cart.push({...p,qty:1});
+ updateCart();showToast("Added to your cart");
+}
+function changeQty(id,delta){
+ const item=cart.find(x=>x.id===id);if(!item)return;
+ item.qty+=delta;if(item.qty<=0)cart=cart.filter(x=>x.id!==id);
+ updateCart();
+}
+function updateCart(){
+ renderCartPage();
+ try { localStorage.setItem("shophub_cart", JSON.stringify(cart.map(x=>({id:x.id,qty:x.qty})))); } catch {}
+ const count=cart.reduce((s,x)=>s+x.qty,0);
+ const subtotal=cart.reduce((s,x)=>s+x.price*x.qty,0);
+ document.getElementById("cartCount").textContent=count;
+ document.getElementById("drawerCount").textContent=count;
+ document.getElementById("cartSubtotal").textContent=money(subtotal);
+ const box=document.getElementById("cartItems");
+ if(!cart.length){box.innerHTML='<div class="text-center text-gray-500 py-16"><i class="fa-solid fa-cart-shopping text-4xl text-orange-300"></i><p class="font-bold mt-3">Your cart is empty</p><p class="text-xs mt-1">Add products to get started.</p></div>';return;}
+ box.innerHTML=cart.map(x=>`<div class="flex gap-3 border-b pb-3"><img src="${x.image}" class="w-16 h-16 rounded object-cover" alt=""><div class="flex-1"><p class="text-sm font-semibold">${x.name}</p><p class="font-bold text-sm mt-1">${money(x.price)}</p><div class="flex items-center gap-3 mt-2"><button onclick="changeQty(${x.id},-1)" class="w-7 h-7 bg-gray-100 rounded">−</button><span class="text-sm">${x.qty}</span><button onclick="changeQty(${x.id},1)" class="w-7 h-7 bg-gray-100 rounded">+</button><button onclick="changeQty(${x.id},-${x.qty})" class="text-xs text-red-600 ml-auto">Remove</button></div></div></div>`).join("");
+}
+function toggleCart(){
+ const drawer=document.getElementById("cartDrawer"),overlay=document.getElementById("cartOverlay");
+ const open=drawer.classList.contains("translate-x-full");
+ drawer.classList.toggle("translate-x-full",!open);overlay.classList.toggle("hidden",!open);
+}
+function openCheckout(){
+ if(!cart.length){showToast("Your cart is empty");return;}
+ const subtotal=cart.reduce((s,x)=>s+x.price*x.qty,0);
+ document.getElementById("checkoutSubtotal").textContent=money(subtotal);
+ document.getElementById("checkoutTotal").textContent=money(subtotal+DELIVERY_FEE);
+ document.getElementById("checkoutMessage").textContent="";
+ document.getElementById("checkoutModal").classList.remove("hidden");
+ document.getElementById("checkoutModal").classList.add("flex");
+}
+function closeCheckout(){
+ const m=document.getElementById("checkoutModal");m.classList.add("hidden");m.classList.remove("flex");
+}
+function showToast(message){
+ const t=document.getElementById("toast");t.textContent=message;t.classList.remove("hidden");
+ clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.add("hidden"),2600);
+}
+document.getElementById("checkoutForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!cart.length){document.getElementById("checkoutMessage").textContent="Your cart is empty.";return;}
+ const button=document.getElementById("payButton"),message=document.getElementById("checkoutMessage");
+ button.disabled=true;button.textContent="PLEASE WAIT...";message.textContent="";
+ const customer={
+  name:document.getElementById("customerName").value.trim(),
+  email:document.getElementById("customerEmail").value.trim(),
+  phone:document.getElementById("customerPhone").value.trim(),
+  address:document.getElementById("customerAddress").value.trim()
+ };
+ try{
+  const response=await fetch("/api/checkout/initialize",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,cart:cart.map(x=>({id:x.id,qty:x.qty}))})});
+  const result=await response.json();
+  if(!response.ok||!result.authorization_url)throw new Error(result.message||"Could not start payment.");
+  window.location.assign(result.authorization_url);
+ }catch(err){message.textContent=err.message;button.disabled=false;button.textContent="CONTINUE TO SECURE PAYMENT";}
+});
+
+document.getElementById("trackOrderForm").addEventListener("submit", async e=>{
+ e.preventDefault();
+ const ref=document.getElementById("orderReferenceInput").value.trim();
+ const result=document.getElementById("orderTrackingResult");
+ result.textContent="Looking up your order...";
+ try{
+  const response=await fetch("/api/orders/"+encodeURIComponent(ref));
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.message||"Order not found.");
+  result.innerHTML=`<div class="border rounded p-3 bg-gray-50"><p><strong>Order:</strong> ${escapeHtml(data.reference)}</p><p><strong>Status:</strong> ${escapeHtml(data.status.replaceAll("_"," "))}</p><p><strong>Total:</strong> ${money(data.total)}</p><p><strong>Placed:</strong> ${new Date(data.createdAt).toLocaleString()}</p></div>`;
+ }catch(err){result.textContent=err.message;}
+});
+function escapeHtml(value){
+ return String(value).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
+function handlePaymentReturn(){
+ const params=new URLSearchParams(location.search);
+ const status=params.get("payment"),reference=params.get("order");
+ if(status==="success"&&reference){
+  cart=[];updateCart();
+  showToast("Payment verified. Your order reference: "+reference);
+  alert("Payment verified successfully!\\nOrder reference: "+reference);
+  history.replaceState({},document.title,location.pathname);
+ }else if(status==="failed"){
+  alert("Payment was not confirmed. If money was deducted, contact the store with your payment reference.");
+  history.replaceState({},document.title,location.pathname);
+ }
+}
+async function loadCatalogue(){
+ try {
+  const response=await fetch("/api/products");
+  if(!response.ok) throw new Error("Catalogue unavailable");
+  const live=await response.json();
+  if(Array.isArray(live) && live.length) products=live;
+ } catch(error) { console.warn("Using built-in sample catalogue",error); }
+ cart=cart.filter(x=>products.some(p=>p.id===x.id)).map(x=>({...products.find(p=>p.id===x.id),qty:x.qty}));
+ renderProducts(products);updateCart();renderWishlist();
+ document.getElementById("flashProducts").innerHTML=products.slice(0,5).map(p=>`<button class="flash-card text-left" onclick="openProductDetails(${p.id})"><img src="${p.image}" alt="${p.name}"><div class="bg-amber-100 text-amber-700 text-xs text-center py-1 font-bold">Limited-time offer</div><div class="p-2"><p class="text-sm line-clamp-2">${p.name}</p><b class="text-sm">${money(p.price)}</b><p class="text-xs text-gray-400 line-through">${money(p.oldPrice)}</p></div></button>`).join("");
+renderProducts(products);updateCart();renderWishlist();handlePaymentReturn();
+}
+loadCatalogue();
+</script>
+</body>
+</html>
