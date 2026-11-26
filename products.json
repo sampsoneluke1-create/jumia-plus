@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "name": "Samsung Galaxy A55 5G - 8GB/256GB",
+    "category": "Phones & Tablets",
+    "price": 545000,
+    "oldPrice": 620000,
+    "discount": "-12%",
+    "rating": 4.8,
+    "reviews": 142,
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500&q=80"
+  },
+  {
+    "id": 2,
+    "name": "Apple MacBook Air M2 13.6-inch",
+    "category": "Computing",
+    "price": 1450000,
+    "oldPrice": 1680000,
+    "discount": "-14%",
+    "rating": 4.9,
+    "reviews": 89,
+    "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80"
+  },
+  {
+    "id": 3,
+    "name": "Sony WH-1000XM5 Wireless Headphones",
+    "category": "Electronics",
+    "price": 420000,
+    "oldPrice": 510000,
+    "discount": "-18%",
+    "rating": 4.7,
+    "reviews": 215,
+    "image": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&q=80"
+  },
+  {
+    "id": 4,
+    "name": "Nike Air Max Pulse Men's Sneakers",
+    "category": "Fashion",
+    "price": 115000,
+    "oldPrice": 150000,
+    "discount": "-23%",
+    "rating": 4.5,
+    "reviews": 64,
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80"
+  },
+  {
+    "id": 5,
+    "name": "Binatone 1.5L Heavy Duty Blender",
+    "category": "Appliances",
+    "price": 48500,
+    "oldPrice": 65000,
+    "discount": "-25%",
+    "rating": 4.4,
+    "reviews": 310,
+    "image": "https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=500&q=80"
+  },
+  {
+    "id": 6,
+    "name": "PlayStation 5 Slim Console",
+    "category": "Gaming",
+    "price": 795000,
+    "oldPrice": 890000,
+    "discount": "-11%",
+    "rating": 4.9,
+    "reviews": 178,
+    "image": "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=500&q=80"
+  },
+  {
+    "id": 7,
+    "name": "Hisense 55-Inch 4K Smart TV",
+    "category": "Electronics",
+    "price": 465000,
+    "oldPrice": 550000,
+    "discount": "-15%",
+    "rating": 4.6,
+    "reviews": 95,
+    "image": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&q=80"
+  },
+  {
+    "id": 8,
+    "name": "Ergonomic Mesh Office Chair",
+    "category": "Home & Office",
+    "price": 135000,
+    "oldPrice": 180000,
+    "discount": "-25%",
+    "rating": 4.3,
+    "reviews": 52,
+    "image": "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?w=500&q=80"
+  },
+  {
+    "id": 9,
+    "name": "iPhone 15 Pro Max 256GB",
+    "category": "Phones & Tablets",
+    "price": 1780000,
+    "oldPrice": 1950000,
+    "discount": "-9%",
+    "rating": 5.0,
+    "reviews": 204,
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80"
+  },
+  {
+    "id": 10,
+    "name": "HP Pavilion 15 Core i7 Laptop",
+    "category": "Computing",
+    "price": 890000,
+    "oldPrice": 1050000,
+    "discount": "-15%",
+    "rating": 4.6,
+    "reviews": 73,
+    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&q=80"
+  }
+]
